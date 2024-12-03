@@ -6,8 +6,10 @@
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Vector3.h>
+#include <chrono>
 
 using std::placeholders::_1;
+using namespace std::chrono_literals;
 
 namespace linear_path_planner
 {
@@ -18,13 +20,16 @@ namespace linear_path_planner
 
         void current_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
         void target_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
+        void timer_callback();
 
         private:
         rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr current_sub;
         rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr target_sub;
         rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr path_pub;
+        rclcpp::TimerBase::SharedPtr timer_;
 
         geometry_msgs::msg::PoseStamped::SharedPtr current_pose_;
+        geometry_msgs::msg::PoseStamped::SharedPtr target_pose_;
         double step_size_param;
 
         tf2::Vector3 getEuler(const geometry_msgs::msg::Quaternion q)

@@ -16,26 +16,29 @@ namespace linear_path_planner
             std::bind(&LinearPathPlanner::current_callback, this, _1)
         );
 
+        timer_ = this->create_wall_timer(1ms, std::bind(&LinearPathPlanner::timer_callback, this));
+
         path_pub = this->create_publisher<nav_msgs::msg::Path>("/path", 0);
 
         current_pose_ = nullptr;
+        target_pose_ = nullptr;
 
         this->declare_parameter("step_size", 0.1);
         this->get_parameter("step_size", step_size_param);
     }
 
-    void LinearPathPlanner::target_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
+    void LinearPathPlanner::timer_callback()
     {
-        if(current_pose_ != nullptr)
+        if(current_pose_ != nullptr && target_pose_ != nullptr)
         {
             auto new_path = nav_msgs::msg::Path();
             new_path.header.frame_id = "map";
 
-            auto target_posture = getEuler(msg->pose.orientation);
+            auto target_posture = getEuler(target_pose_->pose.orientation);
             auto current_posture = getEuler(current_pose_->pose.orientation);
 
-            auto dx = msg->pose.position.x - current_pose_->pose.position.x;
-            auto dy = msg->pose.position.y - current_pose_->pose.position.y;
+            auto dx = target_pose_->pose.position.x - current_pose_->pose.position.x;
+            auto dy = target_pose_->pose.position.y - current_pose_->pose.position.y;
             auto d_rotate = target_posture.getZ() - current_posture.getZ();
 
             auto p2p = std::sqrt(dx*dx + dy*dy);
@@ -60,6 +63,11 @@ namespace linear_path_planner
 
             path_pub->publish(new_path);
         }
+    }
+
+    void LinearPathPlanner::target_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
+    {
+        target_pose_ = msg;
     }
 
     void LinearPathPlanner::current_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
