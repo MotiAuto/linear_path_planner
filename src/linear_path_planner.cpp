@@ -44,7 +44,7 @@ namespace linear_path_planner
             auto p2p = std::sqrt(dx*dx + dy*dy);
             auto step_num = p2p / step_size_param;
 
-            for(int i = 0; i < step_num; i++)
+            for(int i = 1; i < step_num; i++)
             {
                 auto t = static_cast<double>(i) / step_num;
                 auto p = geometry_msgs::msg::PoseStamped();
