@@ -6,6 +6,7 @@
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Vector3.h>
+#include <tf2/LinearMath/Matrix3x3.h>
 #include <chrono>
 
 using std::placeholders::_1;
@@ -32,15 +33,20 @@ namespace linear_path_planner
         geometry_msgs::msg::PoseStamped::SharedPtr target_pose_;
         double step_size_param;
 
-        tf2::Vector3 getEuler(const geometry_msgs::msg::Quaternion q)
+        tf2::Vector3 getEuler(const geometry_msgs::msg::Quaternion& q)
         {
-            tf2::Vector3 v;
-            v.setW(q.w);
-            v.setX(q.x);
-            v.setY(q.y);
-            v.setZ(q.z);
+            tf2::Quaternion tf2_quat;
+            tf2_quat.setW(q.w);
+            tf2_quat.setX(q.x);
+            tf2_quat.setY(q.y);
+            tf2_quat.setZ(q.z);
 
-            return v;
+            tf2::Matrix3x3 mat(tf2_quat);
+
+            double roll, pitch, yaw;
+            mat.getRPY(roll, pitch, yaw);
+
+            return tf2::Vector3(roll, pitch, yaw);
         }
     };
 }
