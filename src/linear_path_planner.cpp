@@ -41,8 +41,11 @@ namespace linear_path_planner
             auto dy = target_pose_->pose.position.y - current_pose_->pose.position.y;
             auto d_rotate = target_posture.getZ() - current_posture.getZ();
 
+            RCLCPP_INFO(this->get_logger(), "t:%lf, c:%lf", target_posture.getZ(), current_posture.getZ());
+
             auto p2p = std::sqrt(dx*dx + dy*dy);
             auto step_num = p2p / step_size_param;
+            auto rad_inc = 0.0;
 
             if(p2p < step_size_param)
             {
@@ -57,7 +60,8 @@ namespace linear_path_planner
                     p.pose.position.x = current_pose_->pose.position.x + t * dx;
                     p.pose.position.y = current_pose_->pose.position.y + t * dy;
                     tf2::Quaternion q;
-                    q.setRPY(0.0, 0.0, current_posture.getZ() + t * d_rotate);
+                    rad_inc += d_rotate / step_num;
+                    q.setRPY(0.0, 0.0, current_posture.getZ() + rad_inc);
 
                     p.pose.orientation.w = q.w();
                     p.pose.orientation.x = q.x();
@@ -67,6 +71,8 @@ namespace linear_path_planner
                     new_path.poses.push_back(p);
                 }
             }
+
+            current_pose_ = nullptr;
 
             path_pub->publish(new_path);
         }
