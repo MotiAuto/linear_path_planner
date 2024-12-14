@@ -44,21 +44,28 @@ namespace linear_path_planner
             auto p2p = std::sqrt(dx*dx + dy*dy);
             auto step_num = p2p / step_size_param;
 
-            for(int i = 1; i < step_num; i++)
+            if(p2p < step_size_param)
             {
-                auto t = static_cast<double>(i) / step_num;
-                auto p = geometry_msgs::msg::PoseStamped();
-                p.pose.position.x = current_pose_->pose.position.x + t * dx;
-                p.pose.position.y = current_pose_->pose.position.y + t * dy;
-                tf2::Quaternion q;
-                q.setRPY(0.0, 0.0, current_posture.getZ() + t * d_rotate);
+                new_path.poses.push_back(*target_pose_);
+            }
+            else
+            {
+                for(int i = 1; i < step_num; i++)
+                {
+                    auto t = static_cast<double>(i) / step_num;
+                    auto p = geometry_msgs::msg::PoseStamped();
+                    p.pose.position.x = current_pose_->pose.position.x + t * dx;
+                    p.pose.position.y = current_pose_->pose.position.y + t * dy;
+                    tf2::Quaternion q;
+                    q.setRPY(0.0, 0.0, current_posture.getZ() + t * d_rotate);
 
-                p.pose.orientation.w = q.w();
-                p.pose.orientation.x = q.x();
-                p.pose.orientation.y = q.y();
-                p.pose.orientation.z = q.z();
-                
-                new_path.poses.push_back(p);
+                    p.pose.orientation.w = q.w();
+                    p.pose.orientation.x = q.x();
+                    p.pose.orientation.y = q.y();
+                    p.pose.orientation.z = q.z();
+                    
+                    new_path.poses.push_back(p);
+                }
             }
 
             path_pub->publish(new_path);
