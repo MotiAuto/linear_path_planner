@@ -41,7 +41,7 @@ namespace linear_path_planner
             auto dy = target_pose_->pose.position.y - current_pose_->pose.position.y;
             auto d_rotate = target_posture.getZ() - current_posture.getZ();
 
-            RCLCPP_INFO(this->get_logger(), "t:%lf, c:%lf", target_posture.getZ(), current_posture.getZ());
+            // RCLCPP_INFO(this->get_logger(), "t:%lf, c:%lf", target_posture.getZ(), current_posture.getZ());
 
             auto p2p = std::sqrt(dx*dx + dy*dy);
             auto step_num = p2p / step_size_param;
