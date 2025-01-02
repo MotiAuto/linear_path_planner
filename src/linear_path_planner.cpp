@@ -6,19 +6,19 @@ namespace linear_path_planner
     {
         target_sub = this->create_subscription<geometry_msgs::msg::PoseStamped>(
             "/target",
-            0,
+            rclcpp::SystemDefaultsQoS(),
             std::bind(&LinearPathPlanner::target_callback, this, _1)
         );
 
         current_sub = this->create_subscription<geometry_msgs::msg::PoseStamped>(
             "/current",
-            0,
+            rclcpp::SystemDefaultsQoS(),
             std::bind(&LinearPathPlanner::current_callback, this, _1)
         );
 
         timer_ = this->create_wall_timer(1ms, std::bind(&LinearPathPlanner::timer_callback, this));
 
-        path_pub = this->create_publisher<nav_msgs::msg::Path>("/path", 0);
+        path_pub = this->create_publisher<nav_msgs::msg::Path>("/path", rclcpp::SystemDefaultsQoS());
 
         current_pose_ = nullptr;
         target_pose_ = nullptr;
@@ -34,17 +34,17 @@ namespace linear_path_planner
             auto new_path = nav_msgs::msg::Path();
             new_path.header.frame_id = "map";
 
-            auto target_posture = getEuler(target_pose_->pose.orientation);
-            auto current_posture = getEuler(current_pose_->pose.orientation);
+            const auto target_posture = getEuler(target_pose_->pose.orientation);
+            const auto current_posture = getEuler(current_pose_->pose.orientation);
 
-            auto dx = target_pose_->pose.position.x - current_pose_->pose.position.x;
-            auto dy = target_pose_->pose.position.y - current_pose_->pose.position.y;
-            auto d_rotate = target_posture.getZ() - current_posture.getZ();
+            const auto dx = target_pose_->pose.position.x - current_pose_->pose.position.x;
+            const auto dy = target_pose_->pose.position.y - current_pose_->pose.position.y;
+            const auto d_rotate = target_posture.getZ() - current_posture.getZ();
 
             // RCLCPP_INFO(this->get_logger(), "t:%lf, c:%lf", target_posture.getZ(), current_posture.getZ());
 
-            auto p2p = std::sqrt(dx*dx + dy*dy);
-            auto step_num = p2p / step_size_param;
+            const auto p2p = std::sqrt(dx*dx + dy*dy);
+            const auto step_num = p2p / step_size_param;
             auto rad_inc = 0.0;
 
             if(p2p < step_size_param)
