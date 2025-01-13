@@ -71,6 +71,8 @@ namespace linear_path_planner
                     new_path.poses.push_back(p);
                 }
             }
+            new_path.poses.push_back(*current_pose_);
+            new_path.poses.push_back(*target_pose_);
 
             current_pose_ = nullptr;
 
